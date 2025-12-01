@@ -8,12 +8,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/forgot-password" replace />} />
         {/* Catch-all route redirects to forgot-password */}
-        <Route path="*" element={<Navigate to="/forgot-password" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
