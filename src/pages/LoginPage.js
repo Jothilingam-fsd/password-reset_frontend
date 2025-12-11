@@ -26,6 +26,12 @@ const LoginPage = () => {
     setError('');
     setSuccess('');
 
+    useEffect(() => {
+      setEmail("");
+      setPassword("");
+    }, []);
+
+
     // Input validations
     if (!email.trim()) {
       setError('Email is required.');
@@ -105,7 +111,7 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="email"
+              autoComplete="off"
               disabled={loading}
             />
           </div>
@@ -128,7 +134,7 @@ const LoginPage = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               disabled={loading}
             />
           </div>
