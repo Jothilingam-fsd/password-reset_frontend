@@ -1,16 +1,4 @@
-/**
- * client/src/pages/ResetPasswordPage.js
- * 
- * React functional component that:
- *  - extracts token param from URL,
- *  - on mount calls backend GET /api/auth/reset-password/:token to validate token,
- *  - if valid, shows Bootstrap form to enter and confirm new password with validation,
- *  - on submit, sends POST /api/auth/reset-password/:token with new password,
- *  - handles success by showing confirmation,
- *  - handles errors like expired token with alert and link back to forgot-password.
- * Uses React state, useEffect, axios, Bootstrap components, and react-icons (lock icon).
- */
-
+// client/src/pages/ResetPasswordPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -19,7 +7,6 @@ import AlertMessage from '../components/AlertMessage';
 
 function ResetPasswordPage() {
   const { token } = useParams();
-
   const [tokenValid, setTokenValid] = useState(false);
   const [loadingToken, setLoadingToken] = useState(true);
   const [password, setPassword] = useState('');
@@ -29,30 +16,25 @@ function ResetPasswordPage() {
   const [resetSuccess, setResetSuccess] = useState(false);
 
   useEffect(() => {
-    /**
-     * Validate the reset token on component mount
-     */
     const validateToken = async () => {
       setLoadingToken(true);
       setAlert({ show: false, variant: '', message: '' });
 
       try {
-        const backendUrl =
-          process.env.REACT_APP_BACKEND_URL || `http://localhost:5000/api/auth/reset-password/${token}`;
+        const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+        const url = `${backendBase}/api/auth/reset-password/${token}`;
 
-        const response = await axios.get(backendUrl);
+        const response = await axios.get(url);
 
-        if (response.data && response.data.success) {
+        if (response?.data?.success) {
           setTokenValid(true);
         } else {
           setTokenValid(false);
-          setAlert({ show: true, variant: 'danger', message: response.data.message || 'Invalid or expired link.' });
+          setAlert({ show: true, variant: 'danger', message: response?.data?.message || 'Invalid or expired link.' });
         }
       } catch (error) {
         let message = 'Failed to validate token. Please try again later.';
-        if (error.response && error.response.data && error.response.data.message) {
-          message = error.response.data.message;
-        }
+        if (error?.response?.data?.message) message = error.response.data.message;
         setAlert({ show: true, variant: 'danger', message });
         setTokenValid(false);
       } finally {
@@ -60,34 +42,16 @@ function ResetPasswordPage() {
       }
     };
 
-    if (token) {
-      validateToken();
-    } else {
+    if (token) validateToken();
+    else {
       setAlert({ show: true, variant: 'danger', message: 'Invalid password reset link.' });
       setLoadingToken(false);
       setTokenValid(false);
     }
   }, [token]);
 
-  /**
-   * Validates password strength according to requirements:
-   *  - At least 8 characters
-   *  - At least one uppercase letter
-   *  - At least one lowercase letter
-   *  - At least one digit
-   *  - At least one special character
-   * @param {string} pwd
-   * @returns {boolean}
-   */
-  const validatePassword = (pwd) => {
-    return (
-      pwd.length >= 8 &&
-      /[A-Z]/.test(pwd) &&
-      /[a-z]/.test(pwd) &&
-      /[0-9]/.test(pwd) &&
-      /[^A-Za-z0-9]/.test(pwd)
-    );
-  };
+  const validatePassword = (pwd) =>
+    pwd.length >= 8 && /[A-Z]/.test(pwd) && /[a-z]/.test(pwd) && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,23 +73,20 @@ function ResetPasswordPage() {
     }
 
     setFormLoading(true);
-
     try {
-      const backendUrl =
-        process.env.REACT_APP_BACKEND_URL || `http://localhost:5000/api/auth/reset-password/${token}`;
+      const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+      const url = `${backendBase}/api/auth/reset-password/${token}`;
 
-      const response = await axios.post(backendUrl, { password });
+      const response = await axios.post(url, { password });
 
-      if (response.data && response.data.success) {
+      if (response?.data?.success) {
         setResetSuccess(true);
       } else {
-        setAlert({ show: true, variant: 'danger', message: response.data.message || 'Failed to reset password.' });
+        setAlert({ show: true, variant: 'danger', message: response?.data?.message || 'Failed to reset password.' });
       }
     } catch (error) {
       let message = 'Failed to reset password. Please try again later.';
-      if (error.response && error.response.data && error.response.data.message) {
-        message = error.response.data.message;
-      }
+      if (error?.response?.data?.message) message = error.response.data.message;
       setAlert({ show: true, variant: 'danger', message });
     } finally {
       setFormLoading(false);
@@ -146,12 +107,8 @@ function ResetPasswordPage() {
   if (!tokenValid) {
     return (
       <div className="container d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
-        {alert.show && (
-          <AlertMessage variant={alert.variant} message={alert.message} onClose={() => setAlert({ show: false })} />
-        )}
-        <Link to="/forgot-password" className="btn btn-link mt-3">
-          Back to Forgot Password
-        </Link>
+        {alert.show && <AlertMessage variant={alert.variant} message={alert.message} onClose={() => setAlert({ show: false })} />}
+        <Link to="/forgot-password" className="btn btn-link mt-3">Back to Forgot Password</Link>
       </div>
     );
   }
@@ -161,13 +118,9 @@ function ResetPasswordPage() {
       <div className="container d-flex flex-column justify-content-center align-items-center min-vh-100 px-3">
         <div className="card shadow-sm p-4" style={{ maxWidth: '420px', width: '100%' }}>
           <h2 className="text-center mb-4">Password Reset Successful</h2>
-          <p className="text-center">
-            Your password has been reset successfully. You can now log in with your new password.
-          </p>
+          <p className="text-center">Your password has been reset successfully. You can now log in with your new password.</p>
           <div className="text-center">
-            <Link to="/forgot-password" className="btn btn-primary">
-              Go to Login
-            </Link>
+            <Link to="/login" className="btn btn-primary">Go to Login</Link>
           </div>
         </div>
       </div>
@@ -182,13 +135,9 @@ function ResetPasswordPage() {
         {alert.show && <AlertMessage variant={alert.variant} message={alert.message} onClose={() => setAlert({ show: false })} />}
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">
-              New Password
-            </label>
+            <label htmlFor="password" className="form-label">New Password</label>
             <div className="input-group">
-              <span className="input-group-text" id="password-addon">
-                <FaLock />
-              </span>
+              <span className="input-group-text" id="password-addon"><FaLock /></span>
               <input
                 type="password"
                 id="password"
@@ -202,18 +151,13 @@ function ResetPasswordPage() {
                 autoComplete="new-password"
               />
             </div>
-            <div className="form-text">
-              Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.
-            </div>
+            <div className="form-text">Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.</div>
           </div>
+
           <div className="mb-3">
-            <label htmlFor="confirmPassword" className="form-label">
-              Confirm New Password
-            </label>
+            <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
             <div className="input-group">
-              <span className="input-group-text" id="confirm-password-addon">
-                <FaLock />
-              </span>
+              <span className="input-group-text" id="confirm-password-addon"><FaLock /></span>
               <input
                 type="password"
                 id="confirmPassword"
@@ -228,6 +172,7 @@ function ResetPasswordPage() {
               />
             </div>
           </div>
+
           <button type="submit" className="btn btn-primary w-100" disabled={formLoading}>
             {formLoading ? (
               <>

@@ -1,14 +1,4 @@
-/**
- * client/src/pages/ForgotPasswordPage.js
- * 
- * React functional component rendering a responsive Bootstrap form for users to enter their email
- * to request a password reset.
- * Uses React state and form validation.
- * On submit, sends POST to backend /api/auth/forgot-password endpoint via axios,
- * shows loading state, success messages, or error alerts.
- * Uses Bootstrap form controls, buttons, and react-icons (envelope icon).
- */
-
+// client/src/pages/ForgotPasswordPage.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEnvelope } from 'react-icons/fa';
@@ -19,19 +9,14 @@ function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, variant: '', message: '' });
 
-  /**
-   * Validates email format using regex.
-   * @param {string} email
-   * @returns {boolean}
-   */
   const validateEmail = (email) => {
-    // Simple email regex
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email.toLowerCase());
+    return re.test(String(email).toLowerCase());
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setAlert({ show: false, variant: '', message: '' });
 
     if (!validateEmail(email)) {
       setAlert({ show: true, variant: 'danger', message: 'Please enter a valid email address.' });
@@ -39,14 +24,14 @@ function ForgotPasswordPage() {
     }
 
     setLoading(true);
-    setAlert({ show: false, variant: '', message: '' });
 
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000/api/auth/forgot-password';
+      const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+      const url = `${backendBase}/api/auth/forgot-password`;
 
-      const response = await axios.post(backendUrl, { email });
+      const response = await axios.post(url, { email });
 
-      if (response.data && response.data.success) {
+      if (response?.data?.success) {
         setAlert({
           show: true,
           variant: 'success',
@@ -55,13 +40,15 @@ function ForgotPasswordPage() {
         });
         setEmail('');
       } else {
-        setAlert({ show: true, variant: 'danger', message: response.data.message || 'Unexpected error occurred.' });
+        setAlert({
+          show: true,
+          variant: 'danger',
+          message: response?.data?.message || 'Unexpected error occurred.',
+        });
       }
     } catch (error) {
       let message = 'Failed to send password reset email. Please try again later.';
-      if (error.response && error.response.data && error.response.data.message) {
-        message = error.response.data.message;
-      }
+      if (error?.response?.data?.message) message = error.response.data.message;
       setAlert({ show: true, variant: 'danger', message });
     } finally {
       setLoading(false);
@@ -75,16 +62,20 @@ function ForgotPasswordPage() {
         <p className="text-center text-muted mb-4">
           Enter your email address below to receive a password reset link.
         </p>
-        {alert.show && <AlertMessage variant={alert.variant} message={alert.message} onClose={() => setAlert({ show: false })} />}
+
+        {alert.show && (
+          <AlertMessage
+            variant={alert.variant}
+            message={alert.message}
+            onClose={() => setAlert({ show: false, variant: '', message: '' })}
+          />
+        )}
+
         <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email address
-            </label>
+            <label htmlFor="email" className="form-label">Email address</label>
             <div className="input-group">
-              <span className="input-group-text" id="email-addon">
-                <FaEnvelope />
-              </span>
+              <span className="input-group-text" id="email-addon"><FaEnvelope /></span>
               <input
                 type="email"
                 id="email"
@@ -95,13 +86,15 @@ function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="email"
               />
             </div>
           </div>
+
           <button type="submit" className="btn btn-primary w-100" disabled={loading}>
             {loading ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
                 Sending...
               </>
             ) : (

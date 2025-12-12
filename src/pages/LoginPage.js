@@ -1,38 +1,27 @@
+// client/src/pages/LoginPage.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import AlertMessage from '../components/AlertMessage';
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
-  // State for form inputs
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // State for alerts
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  // State to disable submit button during request
   const [loading, setLoading] = useState(false);
 
-  // Email validation regex
   const validateEmail = (email) => {
-    // RFC 5322 Official Standard email regex simplified
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    return re.test(String(email).toLowerCase());
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    useEffect(() => {
-      setEmail("");
-      setPassword("");
-    }, []);
-
-
-    // Input validations
     if (!email.trim()) {
       setError('Email is required.');
       return;
@@ -47,34 +36,33 @@ const LoginPage = () => {
     }
 
     setLoading(true);
+
     try {
-      // POST request to backend /login endpoint
-      const response = await axios.post('/api/auth/login', {
+      const backendBase = process.env.REACT_APP_BACKEND_URL || '';
+      // if base provided use full url, otherwise let axios use proxy or relative path
+      const url = backendBase ? `${backendBase}/api/auth/login` : '/api/auth/login';
+
+      const response = await axios.post(url, {
         email: email.trim(),
         password,
       });
 
-      // Assuming response contains a message and optionally a token or user info
-      if (response.data && response.data.token) {
-        // For example, store token in localStorage or cookie
+      if (response?.data?.token) {
         localStorage.setItem('authToken', response.data.token);
         setSuccess('Login successful! Redirecting...');
         setTimeout(() => {
-          // Redirect to dashboard or home page
           window.location.href = '/dashboard';
-        }, 1500);
-      } else if (response.data && response.data.user) {
-        // If token not used, but user info returned
+        }, 1200);
+      } else if (response?.data?.user) {
         setSuccess(`Welcome back, ${response.data.user.email}! Redirecting...`);
         setTimeout(() => {
           window.location.href = '/dashboard';
-        }, 1500);
+        }, 1200);
       } else {
-        setError('Login succeeded but no user data received.');
+        setError(response?.data?.message || 'Login succeeded but no token/user returned.');
       }
     } catch (err) {
-      // Handle errors
-      if (err.response && err.response.data && err.response.data.message) {
+      if (err?.response?.data?.message) {
         setError(err.response.data.message);
       } else if (err.message) {
         setError(err.message);
@@ -95,13 +83,9 @@ const LoginPage = () => {
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="mb-3">
-          <label htmlFor="email" className="form-label">
-            Email address
-          </label>
+          <label htmlFor="email" className="form-label">Email address</label>
           <div className="input-group">
-            <span className="input-group-text" id="email-addon">
-              <FaEnvelope />
-            </span>
+            <span className="input-group-text" id="email-addon"><FaEnvelope /></span>
             <input
               type="email"
               className="form-control"
@@ -118,13 +102,9 @@ const LoginPage = () => {
         </div>
 
         <div className="mb-4">
-          <label htmlFor="password" className="form-label">
-            Password
-          </label>
+          <label htmlFor="password" className="form-label">Password</label>
           <div className="input-group">
-            <span className="input-group-text" id="password-addon">
-              <FaLock />
-            </span>
+            <span className="input-group-text" id="password-addon"><FaLock /></span>
             <input
               type="password"
               className="form-control"
@@ -140,18 +120,14 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="btn btn-primary w-100"
-          disabled={loading}
-          aria-busy={loading}
-        >
+        <button type="submit" className="btn btn-primary w-100" disabled={loading} aria-busy={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
 
       <div className="text-center mt-3">
         <a href="/forgot-password">Forgot Password?</a>
+         <Link to="/register">Register</Link>
       </div>
     </div>
   );
