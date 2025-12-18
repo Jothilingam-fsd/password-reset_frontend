@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
 import AlertMessage from '../components/AlertMessage';
+import API_BASE_URL from '../config/api';
 
 function RegisterPage() {
   const [name, setName] = useState('');
@@ -37,9 +38,8 @@ function RegisterPage() {
 
     setLoading(true);
     try {
-      const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-      const url = `${backendBase}/api/auth/register`;
-
+      const url = `${API_BASE_URL}/api/auth/register`;
+      
       const response = await axios.post(url, { name: name.trim(), email: email.trim(), password });
 
       if (response?.data?.success) {

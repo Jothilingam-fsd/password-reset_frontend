@@ -4,6 +4,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaLock } from 'react-icons/fa';
 import AlertMessage from '../components/AlertMessage';
+import API_BASE_URL from '../config/api';
 
 function ResetPasswordPage() {
   const { token } = useParams();
@@ -21,8 +22,7 @@ function ResetPasswordPage() {
       setAlert({ show: false, variant: '', message: '' });
 
       try {
-        const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-        const url = `${backendBase}/api/auth/reset-password/${token}`;
+        const url = `${API_BASE_URL}/api/auth/reset-password/${token}`;
 
         const response = await axios.get(url);
 

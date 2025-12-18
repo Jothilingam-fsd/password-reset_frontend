@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEnvelope } from 'react-icons/fa';
 import AlertMessage from '../components/AlertMessage';
+import API_BASE_URL from '../config/api';
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -26,8 +27,7 @@ function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const backendBase = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
-      const url = `${backendBase}/api/auth/forgot-password`;
+      const url = `${API_BASE_URL}/api/auth/forgot-password`;
 
       const response = await axios.post(url, { email });
 

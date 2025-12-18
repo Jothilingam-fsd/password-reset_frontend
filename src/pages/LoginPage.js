@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 import AlertMessage from '../components/AlertMessage';
 import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config/api';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -38,9 +39,8 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const backendBase = process.env.REACT_APP_BACKEND_URL || '';
       // if base provided use full url, otherwise let axios use proxy or relative path
-      const url = backendBase ? `${backendBase}/api/auth/login` : '/api/auth/login';
+      const url = `${API_BASE_URL}/api/auth/login`;
 
       const response = await axios.post(url, {
         email: email.trim(),
